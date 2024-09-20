@@ -4,8 +4,6 @@ const app = express(); // This app is instance of express. This app is creating 
 
 const connectDB = require("./config/database");
 
-const User = require("./models/user");
-
 /* 
 
 For Handleing Request
@@ -64,26 +62,90 @@ app.delete("/user", (req, res) => {
 });
 */
 
-app.get("/test", (req, res) => {
-  res.send("Hello Test");
+// This is the middleware for converting the json data into js object for all
+
+const User = require("./models/user");
+const { restart } = require("nodemon");
+app.use(express.json());
+
+// This is for Feed API - GET/Feed - get all the users from the database
+
+app.get("/feed", async (req, res) => {
+  try {
+    const user = await User.find({});
+    if (!user) {
+      res.status(404).send("User Not Found");
+    } else {
+      res.send(user);
+    }
+  } catch {
+    restart.status(400).send("Something Went Wrong");
+  }
 });
 
-app.post("/signup", async (req, res) => {
-  const userObj = {
-    firstName: "Prashant",
-    lastName: "raj",
-    emailId: "prashantraj12313@gmail.com",
-    password: "Cycle@123",
-    age: 26,
-    gender: "Male",
-  };
+// This is for single user
+app.get("/user", async (req, res) => {
+  const userEmail = req.body.emailId;
 
-  const user = new User(userObj);
+  try {
+    const user = await User.find({ emailId: userEmail }); // if i pass empty {} inside this than it will return all
+    if (user.length === 0) {
+      res.status(404).send("User Not Found");
+    }
+    res.send(user);
+  } catch {
+    res.status(400).send("Something went wrong");
+  }
+});
+
+// This is for delete user from the database
+
+app.delete("/user", async (req, res) => {
+  const userId = req.body._id;
+
+  try {
+    //const user  = await User.findByIdAndDelete({_id:userId});
+    // or Both are same like for deleting user we can pass userId to delete user from the database.
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) {
+      res.status(404).send("user Not Found");
+    } else {
+      res.send("User Deleted Successfully");
+    }
+  } catch {
+    res.status(400).send("Something went wrong");
+  }
+});
+
+// This is for Patch
+app.patch("/user", async (req, res) => {
+  const userId = req.body._id;
+  const data = req.body;
+  try {
+    // console.log(userId);
+    const user = await User.findByIdAndUpdate({ _id: userId }, data);
+    //console.log(user);
+    if (!user) {
+      res.status(404).send("User Not Found....");
+    } else {
+      res.send("User Updated");
+    }
+  } catch {
+    res.status(400).send("Something went wrong......");
+  }
+});
+
+// This is for SignUp API
+app.post("/signup", async (req, res) => {
+  // console.log(req.body);  ---> it will read the data from postman(from html/web-page) and we can use it for storing it into DB
+
+  // Creating a new instance of User object
+  const user = new User(req.body);
 
   try {
     await user.save();
 
-    res.send("User Added Succesfully");
+    res.send("User Added Successfully");
   } catch {
     res.status(400).send("Error saving the user:" + err.message);
   }
