@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 // We use "require" for so that, That field must be filled and we use "unique" so there is no duplicate
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const userSchema = new mongoose.Schema(
   {
@@ -17,7 +19,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      // This will validate the email address 
+      // This will validate the email address
       validate(value) {
         if (!validator.isEmail(value)) {
           throw new Error("Invalid Email Address " + value);
@@ -61,6 +63,24 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Create the default setting for the current user for the JWT token 
+userSchema.methods.getJWT = async function () {
+  const user = this;
+  const token = jwt.sign({ _id: user._id }, "DEVTinder@09$", {
+    expiresIn: "1d",
+  });
+
+  return token;
+};
+
+// This is for validating the password of the user against the current user's password.
+userSchema.methods.validatePassword = async function (passwordInputByUser) {
+  const user = this;
+  const passwordHash = user.password;
+  const isPasswordValid = bcrypt.compare(passwordInputByUser, passwordHash);
+  return isPasswordValid;
+};
 
 const User = mongoose.model("User", userSchema);
 
