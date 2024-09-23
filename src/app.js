@@ -128,6 +128,7 @@ app.patch("/user", async (req, res) => {
     if (!user) {
       res.status(404).send("User Not Found....");
     } else {
+      runValidators:true
       res.send("User Updated");
     }
   } catch {
@@ -143,10 +144,15 @@ app.post("/signup", async (req, res) => {
   const user = new User(req.body);
 
   try {
-    await user.save();
+    if (!user) {
+      res.status(404).send("User is already Exists use another Email Id...");
+    } else {
+      await user.save();
+      res.send("User Added Successfully");
+    }
 
-    res.send("User Added Successfully");
-  } catch {
+    
+  } catch(err) {
     res.status(400).send("Error saving the user:" + err.message);
   }
 });
