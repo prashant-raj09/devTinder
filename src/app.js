@@ -118,21 +118,28 @@ app.delete("/user", async (req, res) => {
 });
 
 // This is for Patch
-app.patch("/user", async (req, res) => {
-  const userId = req.body._id;
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
   const data = req.body;
   try {
-    // console.log(userId);
-    const user = await User.findByIdAndUpdate({ _id: userId }, data);
+    const ALLOWED_UPDATES = ["photoUrl", "about", "gender", "age", "skills"];
+    const isValidAllowed = Object.keys(data).every((key) =>
+      ALLOWED_UPDATES.includes(key)
+    );
+    if (!isValidAllowed) {
+      throw new Error("Update not allowed");
+    }
+    const user = await User.findByIdAndUpdate({ _id: userId }, data, {
+      runValidators: true,
+    });
     //console.log(user);
     if (!user) {
       res.status(404).send("User Not Found....");
     } else {
-      runValidators:true
       res.send("User Updated");
     }
-  } catch {
-    res.status(400).send("Something went wrong......");
+  } catch (err) {
+    res.status(400).send("Update Failed " + err.message);
   }
 });
 
@@ -150,9 +157,7 @@ app.post("/signup", async (req, res) => {
       await user.save();
       res.send("User Added Successfully");
     }
-
-    
-  } catch(err) {
+  } catch (err) {
     res.status(400).send("Error saving the user:" + err.message);
   }
 });
