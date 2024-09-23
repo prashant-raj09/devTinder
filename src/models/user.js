@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-// We use "require" for so that, That field must be filled and we use "unique" so there is no dublicate
+// We use "require" for so that, That field must be filled and we use "unique" so there is no duplicate
 
 const userSchema = new mongoose.Schema(
   {

@@ -3,7 +3,9 @@ const express = require("express");
 const app = express(); // This app is instance of express. This app is creating a new web server using express
 
 const connectDB = require("./config/database");
-
+const { validateSignUpData } = require("./utils/validation");
+const bcrypt = require("bcrypt");
+const validator = require("validator");
 /* 
 
 For Handleing Request
@@ -67,6 +69,56 @@ app.delete("/user", (req, res) => {
 const User = require("./models/user");
 const { restart } = require("nodemon");
 app.use(express.json());
+
+// This is for SignUp API
+app.post("/signup", async (req, res) => {
+  // console.log(req.body);  ---> it will read the data from postman(from html/web-page) and we can use it for storing it into DB
+
+  try {
+    // This function is for validation purposes only
+    validateSignUpData(req);
+
+    // Hashing the password using bcrypt
+    const { firstName, lastName, emailId, password } = req.body;
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Creating a new instance of User object
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+    });
+    await user.save();
+    res.send("User Added Successfully");
+  } catch (err) {
+    res.status(400).send("Error saving the user:" + err.message);
+  }
+});
+
+// This is for Login API
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+    if (!validator.isEmail(emailId)) {
+      throw new Error("Invalid Email Address");
+    }
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("Invalid Email Address...");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      throw new Error("Invalid Password, Please enter valid Password");
+    } else {
+      res.send("Login Successful");
+    }
+  } catch (err) {
+    res.status(400).send("Error: " + err.message);
+  }
+});
 
 // This is for Feed API - GET/Feed - get all the users from the database
 
@@ -140,25 +192,6 @@ app.patch("/user/:userId", async (req, res) => {
     }
   } catch (err) {
     res.status(400).send("Update Failed " + err.message);
-  }
-});
-
-// This is for SignUp API
-app.post("/signup", async (req, res) => {
-  // console.log(req.body);  ---> it will read the data from postman(from html/web-page) and we can use it for storing it into DB
-
-  // Creating a new instance of User object
-  const user = new User(req.body);
-
-  try {
-    if (!user) {
-      res.status(404).send("User is already Exists use another Email Id...");
-    } else {
-      await user.save();
-      res.send("User Added Successfully");
-    }
-  } catch (err) {
-    res.status(400).send("Error saving the user:" + err.message);
   }
 });
 
