@@ -5,11 +5,10 @@ const jwt = require("jsonwebtoken");
 const userAuth = async (req, res, next) => {
   try {
     // Read the token from the cookies
-    const cookies = req.cookies;
-    const { token } = cookies;
+    const { token } = req.cookies;
     // check if the token is valid and not expired
     if (!token) {
-      throw new Error("Invalid token");
+      return res.status(401).send("Please Login");
     }
 
     const decodedMessage = await jwt.decode(token, "DEVTinder@09$");
@@ -24,7 +23,7 @@ const userAuth = async (req, res, next) => {
       next(); // send the request to the server and return the response object from the server.
     }
   } catch (err) {
-    throw new Error("Error: " + err.message);
+    res.status(400).send("Error: " + err.message);
   }
 };
 

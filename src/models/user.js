@@ -64,10 +64,10 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Create the default setting for the current user for the JWT token 
+// Create the default setting for the current user for the JWT token
 userSchema.methods.getJWT = async function () {
   const user = this;
-  const token = jwt.sign({ _id: user._id }, "DEVTinder@09$", {
+  const token = await jwt.sign({ _id: user._id }, "DEVTinder@09$", {
     expiresIn: "1d",
   });
 
@@ -78,7 +78,10 @@ userSchema.methods.getJWT = async function () {
 userSchema.methods.validatePassword = async function (passwordInputByUser) {
   const user = this;
   const passwordHash = user.password;
-  const isPasswordValid = bcrypt.compare(passwordInputByUser, passwordHash);
+  const isPasswordValid = await bcrypt.compare(
+    passwordInputByUser,
+    passwordHash
+  );
   return isPasswordValid;
 };
 
