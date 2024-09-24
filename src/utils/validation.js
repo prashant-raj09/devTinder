@@ -11,4 +11,35 @@ const validateSignUpData = (req) => {
   }
 };
 
-module.exports = { validateSignUpData };
+const validateEditProfileData = (req) => {
+  const allowedEditFields = [
+    "firstName",
+    "lastName",
+    "emailId",
+    "photoUrl",
+    "gender",
+    "age",
+    "about",
+    "skills",
+  ];
+  /* 
+  The code checks whether all the fields in the req.body object are allowed to be edited. If any of the fields in the req.body are not included in the allowedEditFields, the result will be false.
+  */
+  const isAllowed = Object.keys(req.body).every((field) =>
+    allowedEditFields.includes(field)
+  );
+  return isAllowed;
+};
+
+const validateEditPassword = (req) => {
+  const { newPassword, confirmPassword } = req.body;
+  if (!newPassword || !confirmPassword) {
+    throw new Error("Please enter a strong Password");
+  }
+};
+
+module.exports = {
+  validateSignUpData,
+  validateEditProfileData,
+  validateEditPassword,
+};

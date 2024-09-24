@@ -6,7 +6,6 @@ const bcrypt = require("bcrypt");
 const validator = require("validator");
 const User = require("../models/user");
 
-
 // This is for SignUp API
 authRouter.post("/signup", async (req, res) => {
   // console.log(req.body);  ---> it will read the data from postman(from html/web-page) and we can use it for storing it into DB
@@ -64,6 +63,15 @@ authRouter.post("/login", async (req, res) => {
   } catch (err) {
     res.status(400).send("Error: " + err.message);
   }
+});
+
+// This is for Logout API
+authRouter.post("/logout", async (req, res) => {
+  res
+    .cookie("token", null, {
+      expires: new Date(Date.now()),
+    })
+    .send("Logout Successfully");
 });
 
 module.exports = authRouter;
