@@ -1,14 +1,65 @@
 const express = require("express");
 const { userAuth } = require("../middlewares/auth");
-
+const ConnectionRequest = require("../models/connectionRequest");
+const User = require("../models/user");
 const requestRouter = express.Router();
 
-requestRouter.post("/sendConnectionRequest",userAuth, async(req,res)=>{
-    const user = req.user;
-    console.log("Sending a connection request");
+requestRouter.post(
+  "/request/send/:status/:toUserId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const fromUserId = req.user._id;
+      const { status, toUserId } = req.params;
 
-    res.send(user.firstName + "sent the connect request!");
-})
+      // it will check the status of what user is sending.
+      const allowedStatus = ["ignored", "interested"];
 
+      if (!allowedStatus.includes(status)) {
+        return res.status(400).json({ message: "Invalid status " + status });
+      }
+
+      // it will find the user to whom the request is being sent. is it present in the DB?
+      const toUser = await User.findById(toUserId);
+      if (!toUser) {
+        return res.status(400).json({ message: "User not found" });
+      }
+
+      const checkConnectionRequest = await ConnectionRequest.findOne({
+        $or: [
+          {
+            fromUserId,
+            toUserId,
+          },
+          {
+            fromUserId: toUserId,
+            toUserId: fromUserId,
+          },
+        ],
+      });
+
+      if (checkConnectionRequest) {
+        return res.status(400).json({ message: "Request already sent" });
+      }
+
+      // TODO: Send request to the toUserId with status
+
+      const connectionRequest = new ConnectionRequest({
+        fromUserId,
+        toUserId,
+        status,
+      });
+      const data = await connectionRequest.save();
+
+      res.json({
+        message:
+          req.user.firstName + " is " + status + " in " + toUser.firstName,
+        data,
+      });
+    } catch (err) {
+      res.status(400).send("Error : " + err.message);
+    }
+  }
+);
 
 module.exports = requestRouter;

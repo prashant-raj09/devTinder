@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema(
     emailId: {
       type: String,
       required: true,
-      unique: true,
+      unique: true, // unique is true means that the email is unique and it is also act as index
       lowercase: true,
       trim: true,
       // This will validate the email address
@@ -40,11 +40,21 @@ const userSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
+      enum:{
+        values:["Male","Female","Others"],
+        message: "{VALUE} is not a valid gender",
+        lowercase: true,
+        trim: true,
+        // This is for the case-insensitive validation.
+      }
+      /*
+      This is same what i did in top
       validate(value) {
         if (!["male", "female", "other"].includes(value.toLowerCase())) {
           throw new Error("Gender is not valid");
         }
       },
+      */
     },
     photoUrl: {
       type: String,
