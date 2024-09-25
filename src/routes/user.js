@@ -42,15 +42,19 @@ userRouter.get("/user/connection", userAuth, async (req, res) => {
           status: "accepted",
         },
       ],
-    }).populate("fromUserId", USER_SAFE_DATA);
+    }).populate("fromUserId", USER_SAFE_DATA).populate("toUserId", USER_SAFE_DATA);
 
-    const data = connectionRequest
-      .map((response) => response.fromUserId)
+    const data = connectionRequest.map((response) => {
+      if (response.fromUserId._id.toString() === loggedInUser._id.toString()) {
+        return response.toUserId;
+      }
+      return response.fromUserId;
+    });
 
-      // This is fetching the first and last names from the current user table.
-      res.json({
-        data,
-      });
+    // This is fetching the first and last names from the current user table.
+    res.json({
+      data,
+    });
   } catch (err) {
     res.status(400).send("Server Error: " + err.message);
   }
