@@ -40,13 +40,12 @@ const userSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum:{
-        values:["Male","Female","Others"],
-        message: "{VALUE} is not a valid gender",
-        lowercase: true,
-        trim: true,
+      enum: {
+        values: ["male", "female", "Other"],
+        message: `{VALUE} is not a valid gender`,
         // This is for the case-insensitive validation.
-      }
+      },
+
       /*
       This is same what i did in top
       validate(value) {
