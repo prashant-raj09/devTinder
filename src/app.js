@@ -1,12 +1,18 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
 const app = express(); // This app is instance of express. This app is creating a new web server using express
 
-
-
 const { restart } = require("nodemon");
+
+app.use(cors(
+  {
+    origin:"http://localhost:5173",
+    credentials:true
+  }
+));
 
 // This is act like middleware for converting it into json object for all
 app.use(express.json());
