@@ -70,6 +70,10 @@ requestRouter.post(
       const loggedInUser = req.user;
       const { status, requestId } = req.params;
 
+      if(requestId == loggedInUser._id) {
+        return res.status(400).json({ message: "Cannot review your own request" });
+      }
+
       // Check the status of the request is valid or not
       const allowedStatus = ["accepted", "rejected"];
       if (!allowedStatus.includes(status)) {
