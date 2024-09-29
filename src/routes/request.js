@@ -4,6 +4,7 @@ const ConnectionRequest = require("../models/connectionRequest");
 const User = require("../models/user");
 const requestRouter = express.Router();
 
+// This is for sending the friend request to the Other Account.
 requestRouter.post(
   "/request/send/:status/:toUserId",
   userAuth,
@@ -62,6 +63,7 @@ requestRouter.post(
   }
 );
 
+// This is for accepting the friend request from the Other Account.
 requestRouter.post(
   "/request/review/:status/:requestId",
   userAuth,
@@ -70,8 +72,10 @@ requestRouter.post(
       const loggedInUser = req.user;
       const { status, requestId } = req.params;
 
-      if(requestId == loggedInUser._id) {
-        return res.status(400).json({ message: "Cannot review your own request" });
+      if (requestId == loggedInUser._id) {
+        return res
+          .status(400)
+          .json({ message: "Cannot review your own request" });
       }
 
       // Check the status of the request is valid or not
@@ -97,6 +101,64 @@ requestRouter.post(
       const data = await connectionRequest.save();
 
       res.json({ message: "Connection request " + status, data });
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  }
+);
+
+// This is for unfollow the user of the connection list
+
+requestRouter.post(
+  "/connection/:status/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      const { status, requestId } = req.params;
+
+      if (requestId == loggedInUser._id) {
+        return res
+          .status(400)
+          .json({ message: "Cannot review your own request" });
+      }
+
+      // Check the status of the request is valid or not
+      // const allowedStatus = ["unfollow"];
+      if (status !== "unfollow") {
+        return res.status(400).json({ message: "Invalid status " + status });
+      }
+
+      // Fetch the specific connection request by requestId
+      const connectionRequest = await ConnectionRequest.findOneAndUpdate(
+        {
+          $or: [
+            {
+              toUserId: loggedInUser._id,
+              fromUserId: requestId,
+              status: "accepted",
+            },
+            {
+              fromUserId: loggedInUser._id,
+              toUserId: requestId,
+              status: "accepted",
+            },
+          ],
+        },
+        { status: "unfollow" }, // Update the status
+        { new: true } // Return the updated document
+      ).select("fromUserId toUserId"); //By calling .select("fromUserId toUserId"), you're telling Mongoose to only return the fromUserId and toUserId fields from the document, along with the _id (which is included by default unless excluded).
+
+      if (!connectionRequest) {
+        return res
+          .status(400)
+          .json({ message: "Request not found or not accepted by you" });
+      }
+
+      res.json({
+        message: "Connection request unfollowed",
+        data: connectionRequest,
+      });
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
