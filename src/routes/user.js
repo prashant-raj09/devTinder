@@ -80,12 +80,20 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       $or: [
         {
           toUserId: loggedInUser,
+          status:"accepted",
         },
         {
           fromUserId: loggedInUser,
+          status: "accepted",
         },
       ],
     }).select("fromUserId toUserId");
+
+    {
+      connectionRequest.map((req) => {
+        console.log(req._id);
+      });
+    }
 
     // Creating a set of unique connections
     const hideUserFromFeed = new Set();
