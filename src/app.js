@@ -34,15 +34,27 @@ app.use("/", userRouter);
 const PORT = parseInt(process.env.PORT, 10) || 3000;
 
 console.log(PORT);
+// connectDB()
+//   .then(() => {
+//     console.log("Database connection established!");
+//     app.listen(PORT, () => {
+//       console.log("Server is listening on port : " +  PORT );
+//     });
+//   })
+//   .catch((err) => {
+//     console.error("error is there : " + err.message);
+//     process.exit(1); // Exit process with failure
+//   });
+
 connectDB()
   .then(() => {
     console.log("Database connection established!");
-    app.listen(PORT, () => {
-      console.log("Server is listening on port : " +  PORT );
+    app.listen(PORT, '0.0.0.0', () => { // Bind to all network interfaces
+      console.log(`Server is listening on port ${PORT}.`);
     });
   })
   .catch((err) => {
-    console.error("error is there : " + err.message);
+    console.error("Error establishing database connection:", err.message);
     process.exit(1); // Exit process with failure
   });
 
