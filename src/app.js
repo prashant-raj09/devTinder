@@ -43,6 +43,7 @@ connectDB()
   })
   .catch((err) => {
     console.error("error is there : " + err.message);
+    process.exit(1); // Exit process with failure
   });
 
 /* 
