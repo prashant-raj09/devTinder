@@ -5,6 +5,7 @@ const ConnectionRequest = require("../models/connectionRequest");
 const User = require("../models/user");
 const USER_SAFE_DATA = "firstName lastName photoUrl age gender about skills";
 
+// Get all the pending connection request for the loggedIn user
 userRouter.get("/user/requests/received", userAuth, async (req, res) => {
   try {
     // Code for getting all received requests from the current user
@@ -79,21 +80,18 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     const connectionRequest = await ConnectionRequest.find({
       $or: [
         {
-          toUserId: loggedInUser,
-          status:"accepted",
+          toUserId: loggedInUser._id,
+          // status: { $in: ["ignored", "interested", "rejected", "accepted"] },
         },
         {
-          fromUserId: loggedInUser,
-          status: "accepted",
+          fromUserId: loggedInUser._id,
+          // status: { $in: ["ignored", "interested", "rejected", "accepted"] },
         },
       ],
     }).select("fromUserId toUserId");
 
-    {
-      connectionRequest.map((req) => {
-        console.log(req._id);
-      });
-    }
+
+    //status: { $in: ["ignored", "interested", "rejected", "accepted"] },
 
     // Creating a set of unique connections
     const hideUserFromFeed = new Set();

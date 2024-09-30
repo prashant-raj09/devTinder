@@ -14,7 +14,7 @@ requestRouter.post(
       const { status, toUserId } = req.params;
 
       // it will check the status of what user is sending.
-      const allowedStatus = ["ignored", "interested"];
+      const allowedStatus = ["rejected", "interested"];
 
       if (!allowedStatus.includes(status)) {
         return res.status(400).json({ message: "Invalid status " + status });

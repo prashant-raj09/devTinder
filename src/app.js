@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const connectDB = require("./config/database");
 const cookieParser = require("cookie-parser");
@@ -5,14 +6,14 @@ const cors = require("cors");
 
 const app = express(); // This app is instance of express. This app is creating a new web server using express
 
-const { restart } = require("nodemon");
+//const { restart } = require("nodemon");
 
-app.use(cors(
-  {
-    origin:"http://localhost:5173",
-    credentials:true
-  }
-));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 
 // This is act like middleware for converting it into json object for all
 app.use(express.json());
@@ -25,26 +26,26 @@ const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
 const userRouter = require("./routes/user");
 
-app.use("/",authRouter);
-app.use("/",profileRouter);
-app.use("/",requestRouter);
-app.use("/",userRouter);
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestRouter);
+app.use("/", userRouter);
 
+const PORT = parseInt(process.env.PORT, 10) || 3000;
 
+console.log(PORT);
 connectDB()
   .then(() => {
     console.log("Database connection established!");
-    app.listen(3000, () => {
-      console.log("Server is listening on port 3000.");
+    app.listen(PORT, () => {
+      console.log("Server is listening on port : " +  PORT );
     });
   })
   .catch((err) => {
-    console.error("error is there");
+    console.error("error is there : " + err.message);
   });
 
-
-
-  /* 
+/* 
 
 For Handleing Request
 
