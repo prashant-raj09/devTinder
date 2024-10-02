@@ -10,7 +10,7 @@ const app = express(); // This app is instance of express. This app is creating 
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://silver-puppy-c5d92e.netlify.app/",
     credentials: true,
   })
 );
