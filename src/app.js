@@ -10,7 +10,7 @@ const app = express(); // This app is instance of express. This app is creating 
 
 app.use(
   cors({
-    origin: "https://silver-puppy-c5d92e.netlify.app/",
+    origin: "https://silver-puppy-c5d92e.netlify.app",
     credentials: true,
   })
 );
@@ -31,7 +31,7 @@ app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
 
-const PORT = parseInt(process.env.PORT, 10) || 4000;
+const PORT = parseInt(process.env.PORT, 10) || 3000;
 
 console.log(PORT);
 // connectDB()
