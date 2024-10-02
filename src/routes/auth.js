@@ -28,12 +28,15 @@ authRouter.post("/signup", async (req, res) => {
     const data = await user.save();
     const token = await data.getJWT();
 
-      // Setting the JWT in a cookie and it will expire after 8hrs from now on.
-      res.cookie("token", token, {
-        expires: new Date(Date.now() + 8 + 3600000),
-      });
+    // Setting the JWT in a cookie and it will expire after 8hrs from now on.
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None", // Needed for cross-origin
+      expires: new Date(Date.now() + 8 + 3600000),
+    });
 
-      res.json({message:"SignUp successfully",data});
+    res.json({ message: "SignUp successfully", data });
   } catch (err) {
     res.status(400).send("Error saving the user:" + err.message);
   }
@@ -62,6 +65,9 @@ authRouter.post("/login", async (req, res) => {
 
       // Setting the JWT in a cookie and it will expire after 8hrs from now on.
       res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "None", // Needed for cross-origin
         expires: new Date(Date.now() + 8 + 3600000),
       });
 
@@ -76,6 +82,9 @@ authRouter.post("/login", async (req, res) => {
 authRouter.post("/logout", async (req, res) => {
   res
     .cookie("token", null, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None", // Needed for cross-origin
       expires: new Date(Date.now()),
     })
     .send("Logout Successfully");
